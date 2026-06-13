@@ -4,6 +4,7 @@ go 1.26
 
 require (
 	github.com/NguyenHoangNguyen22120236/card-onboarding-services v0.0.0
+	github.com/aws/aws-lambda-go v1.54.0
 	github.com/oapi-codegen/runtime v1.4.1
 )
 
