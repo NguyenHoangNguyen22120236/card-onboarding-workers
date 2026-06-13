@@ -3,6 +3,8 @@ package parser
 import (
 	"strings"
 	"testing"
+
+	"card-onboarding-workers/card-onboarding-worker/internal/util"
 )
 
 func TestParseSQSMessage_ValidMessage(t *testing.T) {
@@ -47,7 +49,7 @@ func TestParseSQSMessage_ValidMessage(t *testing.T) {
 		t.Errorf("CardType = %q, want %q", message.CardType, "VISA")
 	}
 	if message.CardNumber != "4111111111111111" {
-		t.Errorf("CardNumber = %q, want %q", message.CardNumber, "4111111111111111")
+		t.Errorf("CardNumber = %q, want %q", util.MaskCardNumber(message.CardNumber), "************1111")
 	}
 	if message.ExpiryDate != "12/28" {
 		t.Errorf("ExpiryDate = %q, want %q", message.ExpiryDate, "12/28")
