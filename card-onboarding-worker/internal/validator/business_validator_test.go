@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"card-onboarding-workers/internal/entity"
+	"card-onboarding-workers/card-onboarding-worker/internal/entity"
 )
 
 func TestValidateBusinessRules_Success(t *testing.T) {

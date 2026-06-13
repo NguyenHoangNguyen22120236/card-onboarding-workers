@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"card-onboarding-workers/internal/entity"
+	"card-onboarding-workers/card-onboarding-worker/internal/entity"
 )
 
 var (

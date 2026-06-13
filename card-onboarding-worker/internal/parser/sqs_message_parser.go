@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"card-onboarding-workers/internal/entity"
+	"card-onboarding-workers/card-onboarding-worker/internal/entity"
 )
 
 func ParseSQSMessage(body string) (entity.OnboardingMessage, error) {
