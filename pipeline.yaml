@@ -1,28 +1,96 @@
-name: CI/CD Pipeline
+env:
+  GO_VERSION: "1.26"
+  ENV: "test"
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+steps:
+  - label: ":golang: lint"
+    key: "lint"
+    command: "make lint"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'
-    
-    - name: Install dependencies
-      run: make install
-    
-    - name: Build
-      run: make build
-    
-    - name: Run tests
-      run: make test
+  - label: ":test_tube: test"
+    key: "test"
+    command: "make test"
+    depends_on: "lint"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
+
+  - label: ":bar_chart: coverage"
+    key: "coverage"
+    command: "make coverage"
+    depends_on: "test"
+    artifact_paths:
+      - "coverage.out"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
+
+  - label: ":hammer: build workers"
+    key: "build-workers"
+    command: "make build"
+    depends_on: "test"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
+
+  - label: ":package: package lambdas"
+    key: "package-lambdas"
+    command: "make package-lambdas"
+    depends_on: "build-workers"
+    artifact_paths:
+      - "dist/*.zip"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
+
+  - label: ":cloudformation: cdk synth"
+    key: "cdk-synth"
+    command: "make cdk-synth"
+    depends_on: "package-lambdas"
+
+  - block: "Deploy to test?"
+    key: "deploy-test-approval"
+    depends_on: "cdk-synth"
+    branches: "main"
+
+  - label: ":rocket: deploy test"
+    key: "deploy-test"
+    command: "make deploy-test"
+    depends_on: "deploy-test-approval"
+    branches: "main"
+
+  - label: ":white_check_mark: smoke tests"
+    key: "smoke-tests"
+    command: "make smoke-test"
+    depends_on: "deploy-test"
+    branches: "main"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
