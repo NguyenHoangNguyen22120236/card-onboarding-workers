@@ -1,0 +1,2 @@
+customer_id,card_type,card_number,expiry_date,holder_name,email
+CUST_SMOKE_VALID_{{RUN_ID}},VISA,4111111111111111,12/29,Smoke Valid,smoke.valid+{{RUN_ID}}@example.com

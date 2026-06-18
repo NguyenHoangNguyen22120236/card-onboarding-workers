@@ -1,0 +1,3 @@
+customer_id,card_type,card_number,expiry_date,holder_name,email
+CUST_SMOKE_STRUCTURE_OK_{{RUN_ID}},MASTERCARD,5555555555554444,10/29,Smoke Structure OK,smoke.structure.ok+{{RUN_ID}}@example.com
+CUST_SMOKE_STRUCTURE_BAD_{{RUN_ID}},VISA,4111111111111111

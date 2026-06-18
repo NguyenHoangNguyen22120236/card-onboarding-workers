@@ -1,0 +1,2 @@
+customer_id,card_type,card_number,expiry_date,holder_name,email
+CUST_SMOKE_BUSINESS_INVALID_{{RUN_ID}},DINERS,4111111111111111,12/29,Smoke Business Invalid,smoke.business.invalid+{{RUN_ID}}@example.com
