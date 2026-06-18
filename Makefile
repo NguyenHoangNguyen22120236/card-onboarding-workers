@@ -5,7 +5,7 @@ ONBOARD_SERVICE_TIMEOUT ?= 5s
 DIST_DIR ?= dist
 GO ?= go
 
-.PHONY: help lint build test coverage clean install lambda-package package-lambdas cdk-synth deploy-test smoke-test
+.PHONY: help lint build test coverage clean install lambda-package package-lambdas cdk-synth deploy-test deploy-prod smoke-test check-prod-config
 
 help:
 	@echo "Available targets:"
@@ -17,6 +17,8 @@ help:
 	@echo "  install         - Install dependencies"
 	@echo "  lambda-package  - Package Lambda functions"
 	@echo "  cdk-synth       - Package Lambdas and synthesize AWS CDK"
+	@echo "  deploy-test     - Package Lambdas and deploy test stack"
+	@echo "  deploy-prod     - Package Lambdas and deploy production stack"
 
 lint:
 	@test -z "$$(gofmt -l .)"
@@ -49,6 +51,12 @@ cdk-synth: lambda-package
 
 deploy-test: lambda-package
 	cd infra && cdk deploy --require-approval never -c env='test' -c maxFileSizeBytes='$(MAX_FILE_SIZE_BYTES)' -c onboardServiceBaseUrl='$(ONBOARD_SERVICE_BASE_URL)' -c onboardServiceTimeout='$(ONBOARD_SERVICE_TIMEOUT)'
+
+check-prod-config:
+	@test "$(ONBOARD_SERVICE_BASE_URL)" != "http://localhost:8080" || (echo "ONBOARD_SERVICE_BASE_URL must be set to the production service URL for deploy-prod" && exit 1)
+
+deploy-prod: check-prod-config lambda-package
+	cd infra && cdk deploy --require-approval never -c env='prod' -c maxFileSizeBytes='$(MAX_FILE_SIZE_BYTES)' -c onboardServiceBaseUrl='$(ONBOARD_SERVICE_BASE_URL)' -c onboardServiceTimeout='$(ONBOARD_SERVICE_TIMEOUT)'
 
 smoke-test:
 	$(GO) test ./... -run 'TestLocalE2ESimulation'

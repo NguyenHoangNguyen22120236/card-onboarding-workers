@@ -94,3 +94,14 @@ steps:
           volumes:
             - ".:/workdir"
             - "../card-onboarding-services:/card-onboarding-services"
+
+  - block: "Deploy to production?"
+    key: "deploy-prod-approval"
+    depends_on: "smoke-tests"
+    branches: "main"
+
+  - label: ":rocket: deploy production"
+    key: "deploy-prod"
+    command: "make deploy-prod"
+    depends_on: "deploy-prod-approval"
+    branches: "main"
