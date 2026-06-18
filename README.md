@@ -2,6 +2,8 @@
 
 Event-driven Go workers for the Card Onboarding File Processing Platform.
 
+## Responsibility
+
 This repository contains two AWS Lambda workers:
 
 - `card-onboarding-file-preprocessor`: consumes S3 object-created events from SQS, downloads uploaded CSV files, validates file structure, writes preprocessing results to S3, and publishes accepted rows to the worker queue.
@@ -22,6 +24,19 @@ Manual CSV Upload
 ```
 
 The preprocessor is the only component that downloads the original CSV file from S3. The onboarding worker only receives one JSON message per structurally accepted CSV row.
+
+## API List
+
+Not applicable. Both components are SQS-triggered Lambda workers and do not expose HTTP APIs.
+
+## Swagger Location
+
+Not applicable for this repository. The onboard-service API consumed by `card-onboarding-worker` is defined in the sibling services repository at `../card-onboarding-services/onboard-service/swagger-internal.yaml`.
+
+## Generated Client Package Location
+
+- `card-onboarding-worker` uses the generated onboard-service client from `../card-onboarding-services/onboard-service/pkg/onboard`.
+- `card-onboarding-file-preprocessor` does not use a generated OpenAPI client.
 
 ## Repository Layout
 
@@ -116,7 +131,14 @@ Business validation failures are logged and treated as handled. The worker does 
 
 Retry is handled by SQS.
 
-Both queues use:
+Queue names:
+
+- preprocessor queue: `card-onboarding-file-preprocessor-sqs-{env}`
+- preprocessor DLQ: `card-onboarding-file-preprocessor-dlq-{env}`
+- worker queue: `card-onboarding-worker-sqs-{env}`
+- worker DLQ: `card-onboarding-worker-dlq-{env}`
+
+Both primary queues use:
 
 - visibility timeout: `60 seconds`
 - message retention: `4 days`
@@ -172,6 +194,15 @@ make build
 make test
 ```
 
+## Local Run Command
+
+The workers are Lambda handlers and are normally invoked by AWS Lambda. For local compilation from the repository root:
+
+```sh
+go build ./card-onboarding-file-preprocessor
+go build ./card-onboarding-worker
+```
+
 Package both Lambda functions into `dist/`:
 
 ```sh
@@ -184,6 +215,30 @@ The packaging script builds Linux AMD64 custom runtime binaries named `bootstrap
 dist/card-onboarding-file-preprocessor.zip
 dist/card-onboarding-worker.zip
 ```
+
+## Docker Build Command
+
+Not applicable. This repository packages Lambda zip artifacts instead of Docker images:
+
+```sh
+make lambda-package
+```
+
+## Unit Test Command
+
+```sh
+make test
+```
+
+## Smoke Test Command
+
+Run the local simulation smoke tests:
+
+```sh
+make smoke-test
+```
+
+Full AWS smoke tests live under `smoke-test/` and require `SMOKE_TEST_ENABLED=true` plus the `SMOKE_*` variables defined in `smoke-test/config.go`.
 
 ## Infrastructure
 
@@ -220,6 +275,20 @@ To deploy directly with CDK, package first, then run CDK from `infra/`:
 make lambda-package
 cd infra
 cdk deploy -c env=dev -c onboardServiceBaseUrl=https://example.internal
+```
+
+## Deployment Command
+
+Deploy the test stack:
+
+```sh
+make deploy-test
+```
+
+Deploy the production stack:
+
+```sh
+make deploy-prod ONBOARD_SERVICE_BASE_URL=https://example.internal
 ```
 
 ## Additional Documentation
