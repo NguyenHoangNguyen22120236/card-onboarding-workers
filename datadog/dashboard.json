@@ -1,0 +1,330 @@
+{
+  "title": "Card Onboarding Workers",
+  "description": "Operational dashboard for card-onboarding-file-preprocessor and card-onboarding-worker.",
+  "layout_type": "ordered",
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "default": "dev"
+    }
+  ],
+  "widgets": [
+    {
+      "definition": {
+        "type": "group",
+        "title": "File Preprocessing",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Files Received",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "files_received",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.preprocessor.files.received{env:$env}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "files_received"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Files Rejected",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "files_rejected",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.preprocessor.files.rejected{env:$env}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "files_rejected"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Records Accepted",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "records_accepted",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.preprocessor.records.accepted{env:$env}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "records_accepted"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Records Rejected",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "records_rejected",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.preprocessor.records.rejected{env:$env}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "records_rejected"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "group",
+        "title": "Worker Processing",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Business Validation Success / Failure",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "success",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.worker.business_validation.success{env:$env}.as_count()"
+                    },
+                    {
+                      "name": "failure",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.worker.business_validation.failure{env:$env}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "success"
+                    },
+                    {
+                      "formula": "failure"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Worker Success / Failure",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "success",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.worker.records.success{env:$env}.as_count()"
+                    },
+                    {
+                      "name": "failure",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.worker.records.failure{env:$env}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "success"
+                    },
+                    {
+                      "formula": "failure"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Onboard-Service Request Rate From Worker",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "request_rate",
+                      "data_source": "metrics",
+                      "query": "sum:card_onboarding.worker.onboard_service.requests{env:$env}.as_rate()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "request_rate"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Onboard-Service Latency From Worker",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "p95_latency",
+                      "data_source": "metrics",
+                      "query": "p95:card_onboarding.worker.onboard_service.latency_ms{env:$env}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "p95_latency"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "label": "milliseconds"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "group",
+        "title": "Queues",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Queue Depth",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "preprocessor_depth",
+                      "data_source": "metrics",
+                      "query": "avg:aws.sqs.approximate_number_of_messages_visible{env:$env,queuename:card-onboarding-file-preprocessor-sqs-*}"
+                    },
+                    {
+                      "name": "worker_depth",
+                      "data_source": "metrics",
+                      "query": "avg:aws.sqs.approximate_number_of_messages_visible{env:$env,queuename:card-onboarding-worker-sqs-*}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "preprocessor_depth"
+                    },
+                    {
+                      "formula": "worker_depth"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "DLQ Message Count",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "preprocessor_dlq",
+                      "data_source": "metrics",
+                      "query": "avg:aws.sqs.approximate_number_of_messages_visible{env:$env,queuename:card-onboarding-file-preprocessor-dlq-*}"
+                    },
+                    {
+                      "name": "worker_dlq",
+                      "data_source": "metrics",
+                      "query": "avg:aws.sqs.approximate_number_of_messages_visible{env:$env,queuename:card-onboarding-worker-dlq-*}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "preprocessor_dlq"
+                    },
+                    {
+                      "formula": "worker_dlq"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

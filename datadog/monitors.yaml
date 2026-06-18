@@ -1,0 +1,98 @@
+monitors:
+  - name: "Card onboarding preprocessor DLQ has messages"
+    type: "query alert"
+    query: >
+      avg(last_5m):avg:aws.sqs.approximate_number_of_messages_visible{queuename:card-onboarding-file-preprocessor-dlq-*} by {queuename} > 0
+    message: >
+      card-onboarding-file-preprocessor DLQ contains messages. Inspect the failed S3 file event and replay or quarantine it.
+    tags:
+      - "project:card-onboarding"
+      - "repo:card-onboarding-workers"
+      - "service:card-onboarding-file-preprocessor"
+    options:
+      thresholds:
+        critical: 0
+      notify_no_data: false
+      include_tags: true
+
+  - name: "Card onboarding worker DLQ has messages"
+    type: "query alert"
+    query: >
+      avg(last_5m):avg:aws.sqs.approximate_number_of_messages_visible{queuename:card-onboarding-worker-dlq-*} by {queuename} > 0
+    message: >
+      card-onboarding-worker DLQ contains messages. Inspect onboard-service failures, malformed messages, or retry exhaustion.
+    tags:
+      - "project:card-onboarding"
+      - "repo:card-onboarding-workers"
+      - "service:card-onboarding-worker"
+    options:
+      thresholds:
+        critical: 0
+      notify_no_data: false
+      include_tags: true
+
+  - name: "Card onboarding preprocessor error rate above 5 percent"
+    type: "query alert"
+    query: >
+      sum(last_10m):sum:card_onboarding.preprocessor.files.failure{*}.as_count() /
+      (sum:card_onboarding.preprocessor.files.success{*}.as_count() + sum:card_onboarding.preprocessor.files.failure{*}.as_count()) > 0.05
+    message: >
+      card-onboarding-file-preprocessor is failing more than 5 percent of files over 10 minutes.
+    tags:
+      - "project:card-onboarding"
+      - "repo:card-onboarding-workers"
+      - "service:card-onboarding-file-preprocessor"
+    options:
+      thresholds:
+        critical: 0.05
+      notify_no_data: false
+      include_tags: true
+
+  - name: "Card onboarding worker error rate above 5 percent"
+    type: "query alert"
+    query: >
+      sum(last_10m):sum:card_onboarding.worker.records.failure{*}.as_count() /
+      (sum:card_onboarding.worker.records.success{*}.as_count() + sum:card_onboarding.worker.records.failure{*}.as_count()) > 0.05
+    message: >
+      card-onboarding-worker is failing more than 5 percent of accepted records over 10 minutes.
+    tags:
+      - "project:card-onboarding"
+      - "repo:card-onboarding-workers"
+      - "service:card-onboarding-worker"
+    options:
+      thresholds:
+        critical: 0.05
+      notify_no_data: false
+      include_tags: true
+
+  - name: "Card onboarding preprocessor SQS oldest message age above 5 minutes"
+    type: "query alert"
+    query: >
+      avg(last_5m):max:aws.sqs.approximate_age_of_oldest_message{queuename:card-onboarding-file-preprocessor-sqs-*} by {queuename} > 300
+    message: >
+      card-onboarding-file-preprocessor SQS has messages older than 5 minutes. Check Lambda concurrency, S3 access, and retry volume.
+    tags:
+      - "project:card-onboarding"
+      - "repo:card-onboarding-workers"
+      - "service:card-onboarding-file-preprocessor"
+    options:
+      thresholds:
+        critical: 300
+      notify_no_data: false
+      include_tags: true
+
+  - name: "Card onboarding worker SQS oldest message age above 5 minutes"
+    type: "query alert"
+    query: >
+      avg(last_5m):max:aws.sqs.approximate_age_of_oldest_message{queuename:card-onboarding-worker-sqs-*} by {queuename} > 300
+    message: >
+      card-onboarding-worker SQS has messages older than 5 minutes. Check Lambda concurrency, onboard-service latency, and retry volume.
+    tags:
+      - "project:card-onboarding"
+      - "repo:card-onboarding-workers"
+      - "service:card-onboarding-worker"
+    options:
+      thresholds:
+        critical: 300
+      notify_no_data: false
+      include_tags: true
