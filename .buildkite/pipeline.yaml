@@ -6,38 +6,32 @@ agents:
   queue: "linux-small"
 
 steps:
-  - label: ":git: checkout services repo"
-    key: "checkout-services"
-    command: |
-      if [ ! -d "../card-onboarding-services" ]; then
-        git clone https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git ../card-onboarding-services
-      fi
-
   - label: ":golang: lint"
     key: "lint"
-    command: "make lint"
-    depends_on: "checkout-services"
+    command: |
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      make lint
     plugins:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
-          volumes:
-            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":test_tube: test"
     key: "test"
-    command: "make test"
+    command: |
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      make test
     depends_on: "lint"
     plugins:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
-          volumes:
-            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":bar_chart: coverage"
     key: "coverage"
-    command: "make coverage"
+    command: |
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      make coverage
     depends_on: "test"
     artifact_paths:
       - "coverage.out"
@@ -45,23 +39,23 @@ steps:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
-          volumes:
-            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":hammer: build workers"
     key: "build-workers"
-    command: "make build"
+    command: |
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      make build
     depends_on: "test"
     plugins:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
-          volumes:
-            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":package: package lambdas"
     key: "package-lambdas"
-    command: "make package-lambdas"
+    command: |
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      make package-lambdas
     depends_on: "build-workers"
     artifact_paths:
       - "dist/*.zip"
@@ -69,12 +63,15 @@ steps:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
-          volumes:
-            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":cloudformation: cdk synth"
     key: "cdk-synth"
-    command: "make cdk-synth"
+    command: |
+      if [ ! -f "../card-onboarding-services/go.mod" ]; then
+        rm -rf ../card-onboarding-services
+        git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git ../card-onboarding-services
+      fi
+      make cdk-synth
     depends_on: "package-lambdas"
 
   - block: "Deploy to test?"
@@ -84,21 +81,26 @@ steps:
 
   - label: ":rocket: deploy test"
     key: "deploy-test"
-    command: "make deploy-test"
+    command: |
+      if [ ! -f "../card-onboarding-services/go.mod" ]; then
+        rm -rf ../card-onboarding-services
+        git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git ../card-onboarding-services
+      fi
+      make deploy-test
     depends_on: "deploy-test-approval"
     branches: "main"
 
   - label: ":white_check_mark: smoke tests"
     key: "smoke-tests"
-    command: "make smoke-test"
+    command: |
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      make smoke-test
     depends_on: "deploy-test"
     branches: "main"
     plugins:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
-          volumes:
-            - "../card-onboarding-services:/card-onboarding-services"
 
   - block: "Deploy to production?"
     key: "deploy-prod-approval"
@@ -107,6 +109,11 @@ steps:
 
   - label: ":rocket: deploy production"
     key: "deploy-prod"
-    command: "make deploy-prod"
+    command: |
+      if [ ! -f "../card-onboarding-services/go.mod" ]; then
+        rm -rf ../card-onboarding-services
+        git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git ../card-onboarding-services
+      fi
+      make deploy-prod
     depends_on: "deploy-prod-approval"
     branches: "main"
