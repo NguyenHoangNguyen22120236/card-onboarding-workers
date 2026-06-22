@@ -42,21 +42,21 @@ install:
 	$(GO) mod download
 
 lambda-package:
-	$(GO) run ./tools/package-lambdas -dist '$(DIST_DIR)'
+	$(GO) run ./tools/package-lambdas -dist "$(DIST_DIR)"
 
 package-lambdas: lambda-package
 
 cdk-synth: lambda-package
-	cd infra && cdk synth -c env='$(ENV)' -c maxFileSizeBytes='$(MAX_FILE_SIZE_BYTES)' -c onboardServiceBaseUrl='$(ONBOARD_SERVICE_BASE_URL)' -c onboardServiceTimeout='$(ONBOARD_SERVICE_TIMEOUT)'
+	cd infra && cdk synth -c env="$(ENV)" -c maxFileSizeBytes="$(MAX_FILE_SIZE_BYTES)" -c onboardServiceBaseUrl="$(ONBOARD_SERVICE_BASE_URL)" -c onboardServiceTimeout="$(ONBOARD_SERVICE_TIMEOUT)"
 
 deploy-test: lambda-package
-	cd infra && cdk deploy --require-approval never -c env='test' -c maxFileSizeBytes='$(MAX_FILE_SIZE_BYTES)' -c onboardServiceBaseUrl='$(ONBOARD_SERVICE_BASE_URL)' -c onboardServiceTimeout='$(ONBOARD_SERVICE_TIMEOUT)'
+	cd infra && cdk deploy --require-approval never -c env="test" -c maxFileSizeBytes="$(MAX_FILE_SIZE_BYTES)" -c onboardServiceBaseUrl="$(ONBOARD_SERVICE_BASE_URL)" -c onboardServiceTimeout="$(ONBOARD_SERVICE_TIMEOUT)"
 
 check-prod-config:
 	@test "$(ONBOARD_SERVICE_BASE_URL)" != "http://localhost:8080" || (echo "ONBOARD_SERVICE_BASE_URL must be set to the production service URL for deploy-prod" && exit 1)
 
 deploy-prod: check-prod-config lambda-package
-	cd infra && cdk deploy --require-approval never -c env='prod' -c maxFileSizeBytes='$(MAX_FILE_SIZE_BYTES)' -c onboardServiceBaseUrl='$(ONBOARD_SERVICE_BASE_URL)' -c onboardServiceTimeout='$(ONBOARD_SERVICE_TIMEOUT)'
+	cd infra && cdk deploy --require-approval never -c env="prod" -c maxFileSizeBytes="$(MAX_FILE_SIZE_BYTES)" -c onboardServiceBaseUrl="$(ONBOARD_SERVICE_BASE_URL)" -c onboardServiceTimeout="$(ONBOARD_SERVICE_TIMEOUT)"
 
 smoke-test:
-	$(GO) test ./... -run 'TestLocalE2ESimulation'
+	$(GO) test ./smoke-test -run TestSmokeFullCardOnboardingPlatform -v
