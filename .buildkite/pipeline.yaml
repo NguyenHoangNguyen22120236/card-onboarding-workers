@@ -2,16 +2,26 @@ env:
   GO_VERSION: "1.26"
   ENV: "test"
 
+agents:
+  queue: "linux-small"
+
 steps:
+  - label: ":git: checkout services repo"
+    key: "checkout-services"
+    command: |
+      if [ ! -d "../card-onboarding-services" ]; then
+        git clone https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git ../card-onboarding-services
+      fi
+
   - label: ":golang: lint"
     key: "lint"
     command: "make lint"
+    depends_on: "checkout-services"
     plugins:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
           volumes:
-            - ".:/workdir"
             - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":test_tube: test"
@@ -23,7 +33,6 @@ steps:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
           volumes:
-            - ".:/workdir"
             - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":bar_chart: coverage"
@@ -37,7 +46,6 @@ steps:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
           volumes:
-            - ".:/workdir"
             - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":hammer: build workers"
@@ -49,7 +57,6 @@ steps:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
           volumes:
-            - ".:/workdir"
             - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":package: package lambdas"
@@ -63,7 +70,6 @@ steps:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
           volumes:
-            - ".:/workdir"
             - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":cloudformation: cdk synth"
@@ -92,7 +98,6 @@ steps:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
           volumes:
-            - ".:/workdir"
             - "../card-onboarding-services:/card-onboarding-services"
 
   - block: "Deploy to production?"
