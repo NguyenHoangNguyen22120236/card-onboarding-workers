@@ -67,12 +67,18 @@ steps:
   - label: ":cloudformation: cdk synth"
     key: "cdk-synth"
     command: |
-      if [ ! -f "../card-onboarding-services/go.mod" ]; then
-        rm -rf ../card-onboarding-services
-        git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git ../card-onboarding-services
-      fi
+      apt-get update
+      apt-get install -y ca-certificates curl
+      curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+      apt-get install -y nodejs
+      npm install --global aws-cdk@2
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
       make cdk-synth
     depends_on: "package-lambdas"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
 
   - block: "Deploy to test?"
     key: "deploy-test-approval"
@@ -82,13 +88,25 @@ steps:
   - label: ":rocket: deploy test"
     key: "deploy-test"
     command: |
-      if [ ! -f "../card-onboarding-services/go.mod" ]; then
-        rm -rf ../card-onboarding-services
-        git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git ../card-onboarding-services
-      fi
+      apt-get update
+      apt-get install -y ca-certificates curl
+      curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+      apt-get install -y nodejs
+      npm install --global aws-cdk@2
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
       make deploy-test
     depends_on: "deploy-test-approval"
     branches: "main"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          environment:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_SESSION_TOKEN
+            - AWS_REGION
+            - AWS_DEFAULT_REGION
 
   - label: ":white_check_mark: smoke tests"
     key: "smoke-tests"
@@ -110,10 +128,22 @@ steps:
   - label: ":rocket: deploy production"
     key: "deploy-prod"
     command: |
-      if [ ! -f "../card-onboarding-services/go.mod" ]; then
-        rm -rf ../card-onboarding-services
-        git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git ../card-onboarding-services
-      fi
+      apt-get update
+      apt-get install -y ca-certificates curl
+      curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+      apt-get install -y nodejs
+      npm install --global aws-cdk@2
+      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
       make deploy-prod
     depends_on: "deploy-prod-approval"
     branches: "main"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          environment:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_SESSION_TOKEN
+            - AWS_REGION
+            - AWS_DEFAULT_REGION
