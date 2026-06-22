@@ -2,6 +2,9 @@ env:
   GO_VERSION: "1.26"
   ENV: "test"
 
+agents:
+  queue: "windows"
+
 steps:
   - label: ":golang: lint"
     key: "lint"
