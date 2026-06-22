@@ -2,18 +2,29 @@ env:
   GO_VERSION: "1.26"
   ENV: "test"
 
-agents:
-  queue: "windows"
-
 steps:
   - label: ":golang: lint"
     key: "lint"
     command: "make lint"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":test_tube: test"
     key: "test"
     command: "make test"
     depends_on: "lint"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":bar_chart: coverage"
     key: "coverage"
@@ -21,11 +32,25 @@ steps:
     depends_on: "test"
     artifact_paths:
       - "coverage.out"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":hammer: build workers"
     key: "build-workers"
     command: "make build"
     depends_on: "test"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":package: package lambdas"
     key: "package-lambdas"
@@ -33,6 +58,13 @@ steps:
     depends_on: "build-workers"
     artifact_paths:
       - "dist/*.zip"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
 
   - label: ":cloudformation: cdk synth"
     key: "cdk-synth"
@@ -55,6 +87,13 @@ steps:
     command: "make smoke-test"
     depends_on: "deploy-test"
     branches: "main"
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:${GO_VERSION}"
+          workdir: /workdir
+          volumes:
+            - ".:/workdir"
+            - "../card-onboarding-services:/card-onboarding-services"
 
   - block: "Deploy to production?"
     key: "deploy-prod-approval"
