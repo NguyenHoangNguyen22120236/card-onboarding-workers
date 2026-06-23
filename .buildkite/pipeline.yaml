@@ -89,14 +89,26 @@ steps:
     key: "deploy-test"
     command: |
       apt-get update
-      apt-get install -y ca-certificates curl
+      apt-get install -y ca-certificates curl unzip awscli
       curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
       apt-get install -y nodejs
       npm install --global aws-cdk@2
+
       git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      cd /card-onboarding-services
+
+      aws sts get-caller-identity
+      aws configure list
+
       make deploy-test
     depends_on: "deploy-test-approval"
     branches: "main"
+    secrets:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_ACCOUNT_ID
     plugins:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
@@ -104,21 +116,40 @@ steps:
           environment:
             - AWS_ACCESS_KEY_ID
             - AWS_SECRET_ACCESS_KEY
-            - AWS_SESSION_TOKEN
             - AWS_REGION
             - AWS_DEFAULT_REGION
+            - AWS_ACCOUNT_ID
 
   - label: ":white_check_mark: smoke tests"
     key: "smoke-tests"
     command: |
+      apt-get update
+      apt-get install -y awscli
+
       git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      cd /card-onboarding-services
+
+      aws sts get-caller-identity
+
       make smoke-test
     depends_on: "deploy-test"
     branches: "main"
+    secrets:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_ACCOUNT_ID
     plugins:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
+          environment:
+            - AWS_ACCESS_KEY_ID
+            - AWS_SECRET_ACCESS_KEY
+            - AWS_REGION
+            - AWS_DEFAULT_REGION
+            - AWS_ACCOUNT_ID
 
   - block: "Deploy to production?"
     key: "deploy-prod-approval"
@@ -129,14 +160,26 @@ steps:
     key: "deploy-prod"
     command: |
       apt-get update
-      apt-get install -y ca-certificates curl
+      apt-get install -y ca-certificates curl unzip awscli
       curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
       apt-get install -y nodejs
       npm install --global aws-cdk@2
+
       git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+      cd /card-onboarding-services
+
+      aws sts get-caller-identity
+      aws configure list
+
       make deploy-prod
     depends_on: "deploy-prod-approval"
     branches: "main"
+    secrets:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_ACCOUNT_ID
     plugins:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
@@ -144,6 +187,6 @@ steps:
           environment:
             - AWS_ACCESS_KEY_ID
             - AWS_SECRET_ACCESS_KEY
-            - AWS_SESSION_TOKEN
             - AWS_REGION
             - AWS_DEFAULT_REGION
+            - AWS_ACCOUNT_ID
