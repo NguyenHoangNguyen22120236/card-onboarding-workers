@@ -1,6 +1,7 @@
 env:
   GO_VERSION: "1.26"
   ENV: "test"
+  AWS_PAGER: ""
 
 agents:
   queue: "linux-small"
@@ -119,6 +120,7 @@ steps:
             - AWS_REGION
             - AWS_DEFAULT_REGION
             - AWS_ACCOUNT_ID
+            - AWS_PAGER
 
   - label: ":white_check_mark: smoke tests"
     key: "smoke-tests"
@@ -150,6 +152,7 @@ steps:
             - AWS_REGION
             - AWS_DEFAULT_REGION
             - AWS_ACCOUNT_ID
+            - AWS_PAGER
 
   - block: "Deploy to production?"
     key: "deploy-prod-approval"
@@ -190,3 +193,4 @@ steps:
             - AWS_REGION
             - AWS_DEFAULT_REGION
             - AWS_ACCOUNT_ID
+            - AWS_PAGER
