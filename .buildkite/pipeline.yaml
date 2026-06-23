@@ -152,42 +152,42 @@ steps:
             - AWS_ACCOUNT_ID
             - AWS_PAGER
 
-  - block: "Deploy to production?"
-    key: "deploy-prod-approval"
-    depends_on: "smoke-tests"
-    branches: "main"
+  #- block: "Deploy to production?"
+  #  key: "deploy-prod-approval"
+  #  depends_on: "smoke-tests"
+  #  branches: "main"
 
-  - label: ":rocket: deploy production"
-    key: "deploy-prod"
-    command: |
-      apt-get update
-      apt-get install -y ca-certificates curl unzip awscli
-      curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-      apt-get install -y nodejs
-      npm install --global aws-cdk@2
+  #- label: ":rocket: deploy production"
+  #  key: "deploy-prod"
+  #  command: |
+  #    apt-get update
+  #    apt-get install -y ca-certificates curl unzip awscli
+  #    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+  #    apt-get install -y nodejs
+  #    npm install --global aws-cdk@2
 
-      git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
+  #    git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
 
-      aws sts get-caller-identity
-      aws configure list
+  #    aws sts get-caller-identity
+  #    aws configure list
 
-      make deploy-prod
-    depends_on: "deploy-prod-approval"
-    branches: "main"
-    secrets:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_REGION
-      - AWS_DEFAULT_REGION
-      - AWS_ACCOUNT_ID
-    plugins:
-      - docker#v5.13.0:
-          image: "golang:${GO_VERSION}"
-          workdir: /workdir
-          environment:
-            - AWS_ACCESS_KEY_ID
-            - AWS_SECRET_ACCESS_KEY
-            - AWS_REGION
-            - AWS_DEFAULT_REGION
-            - AWS_ACCOUNT_ID
-            - AWS_PAGER
+  #    make deploy-prod
+  #  depends_on: "deploy-prod-approval"
+  #  branches: "main"
+  #  secrets:
+  #    - AWS_ACCESS_KEY_ID
+  #    - AWS_SECRET_ACCESS_KEY
+  #    - AWS_REGION
+  #    - AWS_DEFAULT_REGION
+  #    - AWS_ACCOUNT_ID
+  #  plugins:
+  #    - docker#v5.13.0:
+  #        image: "golang:${GO_VERSION}"
+  #        workdir: /workdir
+  #        environment:
+  #          - AWS_ACCESS_KEY_ID
+  #          - AWS_SECRET_ACCESS_KEY
+  #          - AWS_REGION
+  #          - AWS_DEFAULT_REGION
+  #          - AWS_ACCOUNT_ID
+  #          - AWS_PAGER
