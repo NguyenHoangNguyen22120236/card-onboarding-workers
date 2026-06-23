@@ -96,7 +96,6 @@ steps:
       npm install --global aws-cdk@2
 
       git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
-      cd /card-onboarding-services
 
       aws sts get-caller-identity
       aws configure list
@@ -129,7 +128,6 @@ steps:
       apt-get install -y awscli
 
       git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
-      cd /card-onboarding-services
 
       aws sts get-caller-identity
 
@@ -169,7 +167,6 @@ steps:
       npm install --global aws-cdk@2
 
       git clone --depth 1 https://github.com/NguyenHoangNguyen22120236/card-onboarding-services.git /card-onboarding-services
-      cd /card-onboarding-services
 
       aws sts get-caller-identity
       aws configure list
