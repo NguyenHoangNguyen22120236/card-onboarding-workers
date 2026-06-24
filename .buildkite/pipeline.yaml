@@ -3,6 +3,8 @@ env:
   ENV: "test"
   ENVIRONMENT_NAME: "test"
   AWS_PAGER: ""
+  ONBOARD_SERVICE_BASE_URL: "http://card-onboarding-test-997839491.ap-southeast-1.elb.amazonaws.com:8080"
+  ONBOARD_SERVICE_TIMEOUT: "5s"
 
 agents:
   queue: "linux-small"
@@ -81,6 +83,9 @@ steps:
       - docker#v5.13.0:
           image: "golang:${GO_VERSION}"
           workdir: /workdir
+          environment:
+            - ONBOARD_SERVICE_BASE_URL
+            - ONBOARD_SERVICE_TIMEOUT
 
   - block: "Deploy to test?"
     key: "deploy-test-approval"
@@ -121,6 +126,8 @@ steps:
             - AWS_DEFAULT_REGION
             - AWS_ACCOUNT_ID
             - AWS_PAGER
+            - ONBOARD_SERVICE_BASE_URL
+            - ONBOARD_SERVICE_TIMEOUT
 
   - label: ":chart_with_upwards_trend: deploy cloudwatch monitoring"
     key: "deploy-monitoring"
