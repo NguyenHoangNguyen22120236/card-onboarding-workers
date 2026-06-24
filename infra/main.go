@@ -298,17 +298,29 @@ func main() {
 	repoRoot := repositoryRoot()
 
 	envName := contextString(app, "env", "dev")
-	NewCardOnboardingWorkersStack(app, "CardOnboardingWorkersStack", &CardOnboardingWorkersStackProps{
-		EnvName:                 envName,
-		MaxFileSizeBytes:        contextString(app, "maxFileSizeBytes", "10485760"),
-		OnboardServiceBaseURL:   contextString(app, "onboardServiceBaseUrl", "http://localhost:8080"),
-		OnboardServiceTimeout:   contextString(app, "onboardServiceTimeout", "5s"),
-		PreprocessorAssetZipAbs: filepath.Join(repoRoot, "dist", "card-onboarding-file-preprocessor.zip"),
-		WorkerAssetZipAbs:       filepath.Join(repoRoot, "dist", "card-onboarding-worker.zip"),
-	})
-	NewCardOnboardingMonitoringStack(app, "CardOnboardingMonitoringStack", &CardOnboardingMonitoringStackProps{
-		EnvName: envName,
-	})
+	stackGroup := contextString(app, "stackGroup", "all")
+
+	switch stackGroup {
+	case "all", "workers", "monitoring":
+	default:
+		panic(fmt.Sprintf("invalid stackGroup %q: expected all, workers, or monitoring", stackGroup))
+	}
+
+	if stackGroup == "all" || stackGroup == "workers" {
+		NewCardOnboardingWorkersStack(app, "CardOnboardingWorkersStack", &CardOnboardingWorkersStackProps{
+			EnvName:                 envName,
+			MaxFileSizeBytes:        contextString(app, "maxFileSizeBytes", "10485760"),
+			OnboardServiceBaseURL:   contextString(app, "onboardServiceBaseUrl", "http://localhost:8080"),
+			OnboardServiceTimeout:   contextString(app, "onboardServiceTimeout", "5s"),
+			PreprocessorAssetZipAbs: filepath.Join(repoRoot, "dist", "card-onboarding-file-preprocessor.zip"),
+			WorkerAssetZipAbs:       filepath.Join(repoRoot, "dist", "card-onboarding-worker.zip"),
+		})
+	}
+	if stackGroup == "all" || stackGroup == "monitoring" {
+		NewCardOnboardingMonitoringStack(app, "CardOnboardingMonitoringStack", &CardOnboardingMonitoringStackProps{
+			EnvName: envName,
+		})
+	}
 
 	app.Synth(nil)
 }
