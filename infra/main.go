@@ -47,12 +47,14 @@ func NewCardOnboardingWorkersStack(scope constructs.Construct, id string, props 
 	workerFunctionName := fmt.Sprintf("%s-%s", workerName, props.EnvName)
 
 	preprocessorFunction := newGoLambda(stack, "PreprocessorFunction", preprocessorFunctionName, props.PreprocessorAssetZipAbs, map[string]*string{
+		"ENVIRONMENT_NAME":    jsii.String(props.EnvName),
 		"OUTPUT_BUCKET_NAME":  outputBucket.BucketName(),
 		"MAX_FILE_SIZE_BYTES": jsii.String(props.MaxFileSizeBytes),
 		"WORKER_QUEUE_URL":    workerQueue.QueueUrl(),
 	})
 
 	workerFunction := newGoLambda(stack, "WorkerFunction", workerFunctionName, props.WorkerAssetZipAbs, map[string]*string{
+		"ENVIRONMENT_NAME":         jsii.String(props.EnvName),
 		"ONBOARD_SERVICE_BASE_URL": jsii.String(props.OnboardServiceBaseURL),
 		"ONBOARD_SERVICE_TIMEOUT":  jsii.String(props.OnboardServiceTimeout),
 	})
